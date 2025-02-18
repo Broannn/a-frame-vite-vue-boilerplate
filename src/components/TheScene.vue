@@ -2,64 +2,72 @@
   import { ref } from 'vue';
 
   import TheCameraRig from './TheCameraRig.vue';
-  import TheMainRoom from './TheMainRoom.vue';
-  import TheLifeCubeRoom from './TheLifeCubeRoom.vue';
-  import ThePhysicRoom from './ThePhysicRoom.vue';
-
+  import '../aframe/tesselation-square.js';
+  import '../aframe/emit-when-near.js';
+  import '../aframe/event-set.js';
+  import '../aframe/listen-to.js';
   import '../aframe/simple-grab.js';
-
-  defineProps({
-    scale: Number,
-    overlaySelector: String,
-  });
+  import '../aframe/clickable.js';
 
   const allAssetsLoaded = ref(false);
+
+  function collision(event) {
+    console.log('collision', event.detail);
+  }
+
 </script>
 
 <template>
   <a-scene
-    background="color: black;"
-    :webxr="`
-      requiredFeatures: local-floor;
-      referenceSpaceType: local-floor;
-      optionalFeatures: dom-overlay;
-      overlayElement: ${overlaySelector};
-    `"
-    xr-mode-ui="XRMode: xr"
-    physx="
-      autoLoad: true;
-      delay: 1000;
-      useDefaultScene: false;
-      wasmUrl: lib/physx.release.wasm;
-    "
-    simple-grab
+    fog="type: linear; color: #a3d0ed; near: 30; far: 60"
+    background="color: #a3d0ed;"
   >
 
     <a-assets @loaded="allAssetsLoaded = true">
-      <!--
-        Title: VR Gallery
-        Model source: https://sketchfab.com/3d-models/vr-gallery-1ac32ed62fdf424498acc146fad31f7e
-        Model author: https://sketchfab.com/mvrc.art (Maxim Mavrichev)
-        Model license: CC BY 4.0 ( https://creativecommons.org/licenses/by/4.0/ )
-      -->
-      <a-asset-item id="room" src="assets/vr_gallery.glb"></a-asset-item>
-      <!--
-        Title: 3D Gallery for VR projects
-        Model source: https://sketchfab.com/3d-models/3d-gallery-for-vr-projects-68f77ed8558c4bd59e0a13e2cc9d1fd1
-        Model author: https://sketchfab.com/tekuto1s (tekuto1s)
-        Model license: CC BY 4.0 ( https://creativecommons.org/licenses/by/4.0/ )
-      -->
-      <a-asset-item id="physic-room" src="assets/3d_gallery_for_vr_projects.glb"></a-asset-item>
-      <a-asset-item id="sound-1" response-type="arraybuffer" src="assets/sound1.mp3" preload="auto"></a-asset-item>
-      <img id="room-physic-out-texture" :src="`assets/main-room-from-physic-room.png`">
-      <img id="room-gol-out-texture" :src="`assets/main-room-from-gol-room.png`">
-      <img id="room-physic-texture" :src="`assets/physicRoom.png`">
+
     </a-assets>
 
     <template v-if="allAssetsLoaded">
-      <TheMainRoom :scale="scale" />
-      <TheLifeCubeRoom />
-      <ThePhysicRoom />
+
+      <a-sphere
+        id="sphere-box-1"
+        position="0 0 -5"
+        emit-when-near="distance: 2"
+        color="blue"
+        @click="collision($event)"
+        event-set__change-when-near="attribute: color; value: red"
+        event-set__change-when-far="event: unclick; attribute: color; value: blue"
+      ></a-sphere>
+
+      <a-sphere
+        position="10 0 -5"
+        color="green"
+        listen-to="target: #sphere-box-1;"
+        event-set="attribute: color; value: red"
+      ></a-sphere>
+
+      <a-box
+        obb-collider
+        id="radio"
+        position="-2 0 -3"
+        scale="2 2 2"
+        color="red"
+        visible="true"
+        event-set="event: obbcollisionstarted; attribute: visible; value: false"
+      ></a-box>
+
+      <a-box
+        obb-collider
+        id="power"
+        position="2 0 -3"
+        scale="0.2 0.2 0.2"
+        color="green"
+        simple-grab
+        clickable
+      ></a-box>
+
+      <a-plane position="0 0 -5" rotation="-90 0 0" width="100" height="100" color="#7bc8a4"></a-plane>
+
     </template>
 
     <TheCameraRig />
