@@ -31,9 +31,19 @@
       ></a-ocean>
 
 
-      <a-entity tesselation-square="tileSize: 1.5; cols: 5; rows: 5; offset: 0.1"></a-entity>
-    </template>
-
+      <a-entity 
+        tesseletion-square="
+          boxSize: 1; 
+          gap: 0.05; 
+          rows: 5; 
+          cols: 5;
+          baseHue: 120;
+          baseSaturation: 70;
+          minLightness: 30;
+          maxLightness: 70"
+        position="0 0 -5"
+      ></a-entity>
+      </template>
     <TheCameraRig />
 
   </a-scene>
